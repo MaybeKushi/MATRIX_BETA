@@ -1,5 +1,6 @@
 import json
 from pyrogram import Client, filters
+from pyrogram.types import InlineKeyboardMarkup, InlineKeyboardButton
 import os
 from subprocess import Popen, PIPE
 
@@ -59,11 +60,12 @@ async def start(client, message):
 
     share_link = f"https://telegram.me/share/url?url=Join%20the%20Matrix%20AI%20journey%20with%20me%21%20...%20{user_id}"
 
-    inline_keyboard = [[
-        {"text": "Play Now 🪂", "url": f"https://mtx-ai-bot.vercel.app/?userId={user_id}"},
-        {"text": "Join Community 🔥", "url": "https://telegram.me/MatrixAi_Ann"},
-        {"text": "Share Link 📤", "url": share_link}
-    ]]
+    # Corrected inline keyboard
+    inline_keyboard = InlineKeyboardMarkup([
+        [InlineKeyboardButton("Play Now 🪂", url=f"https://mtx-ai-bot.vercel.app/?userId={user_id}")],
+        [InlineKeyboardButton("Join Community 🔥", url="https://telegram.me/MatrixAi_Ann")],
+        [InlineKeyboardButton("Share Link 📤", url=share_link)]
+    ])
 
     if command_args and command_args.startswith('ref_'):
         inviter_id = command_args.split('ref_')[1]
@@ -77,14 +79,14 @@ async def start(client, message):
             inviter_name = await get_username(client, inviter_id)
             message_text = f"{MATRIX_START_TEXT}\nInvited by: {inviter_name}"
 
-            await client.send_photo(chat_id, "https://i.ibb.co/XDPzBWc/pngtree-virtual-panel-generate-ai-image-15868619.jpg", caption=message_text, reply_markup={"inline_keyboard": inline_keyboard})
+            await client.send_photo(chat_id, "https://i.ibb.co/XDPzBWc/pngtree-virtual-panel-generate-ai-image-15868619.jpg", caption=message_text, reply_markup=inline_keyboard)
             await client.send_message(inviter_id, f"{message.from_user.first_name} joined via your invite link!")
         else:
             await message.reply('Invalid referral link.')
     else:
         user = await find_or_create_user(user_id)
         invited_by = f"Invited by: {await get_username(client, user['inviterId'])}" if user.get('inviterId') else ''
-        await client.send_photo(chat_id, "https://i.ibb.co/XDPzBWc/pngtree-virtual-panel-generate-ai-image-15868619.jpg", caption=f"{MATRIX_START_TEXT}\n{invited_by}", reply_markup={"inline_keyboard": inline_keyboard})
+        await client.send_photo(chat_id, "https://i.ibb.co/XDPzBWc/pngtree-virtual-panel-generate-ai-image-15868619.jpg", caption=f"{MATRIX_START_TEXT}\n{invited_by}", reply_markup=inline_keyboard)
 
 @app.on_message(filters.command("referrals"))
 async def referrals(client, message):
